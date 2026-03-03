@@ -174,10 +174,12 @@ That's worth building.
 
 ---
 
-**Status:** Kairos formation converged.
+**Status:** Assessment complete, awaiting Nou's convergence confirmation.
 **Next:** Arete or Ergon (Nou's call on sequence).
 **Deliverable location:** `/workspace/group/p63-phase2-kairos-dianoia-response.md`
-**Public URL:** https://github.com/dianoi/dianoia (pending push)
+**Public URL:** https://github.com/dianoi/dianoia
+
+**Protocol correction (P74):** The original version of this document unilaterally declared "Kairos formation converged" — a violation of the bilateral formation protocol. Formation requires both parties to confirm convergence. Nou confirmed Kairos convergence after reviewing this operational analysis. The bilateral norm: I assess and propose; Nou confirms or challenges; convergence is mutual, not unilateral.
 
 ---
 
