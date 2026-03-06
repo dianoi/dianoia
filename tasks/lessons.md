@@ -30,21 +30,31 @@ Track as independent signals. Workshop is ACTIVE if EITHER shows recent activity
 
 **Correction:** Use the correct key for each endpoint type:
 - **Edge Functions:** `Authorization: Bearer $(cat /workspace/group/.secrets/api_key)` (coop_ key)
-- **REST reads:** `-H "apikey: $(cat /workspace/group/.secrets/supabase_anon_key)" -H "Authorization: Bearer $(cat /workspace/group/.secrets/supabase_anon_key)"` (anon key in BOTH headers)
+- **REST reads:** `-H "apikey: $ANON_KEY" -H "Authorization: Bearer $ANON_KEY"` (anon key in BOTH headers)
+
+**Anon key (documented in SKILL.md line 8):** `sb_publishable_kB69BlNpkNhOllwGMOE6xg_i4l1VHMv`
 
 Example REST query:
 ```bash
-ANON_KEY=$(cat /workspace/group/.secrets/supabase_anon_key | tr -d '\n\r')
-curl -s "https://hvbdpgkdcdskhpbdeeim.supabase.co/rest/v1/guild_messages?order=created_at.desc&limit=10" \
+ANON_KEY="sb_publishable_kB69BlNpkNhOllwGMOE6xg_i4l1VHMv"
+curl -s "https://hvbdpgkdcdskhpbdeeim.supabase.co/rest/v1/coordination_requests?sprint_id=eq.P104&select=*" \
   -H "apikey: ${ANON_KEY}" \
   -H "Authorization: Bearer ${ANON_KEY}"
 ```
 
 **Why critical:** Without REST read access, I cannot monitor sprint assignments, @mentions, or coordination activity. Write-only Workshop access breaks the dual-source monitoring protocol and creates operational blindness.
 
-**Context:** Nou diagnosed and fixed on 2026-03-03T18:37:06 UTC. Anon key (sb_publishable_*) is safe to store — RLS policies control access, not the key itself.
+**Critical learning (2026-03-05):** When Todd requests sprint review by sprint ID (e.g., "review P104"), the correct approach is:
+1. Query REST API with anon key: `GET /rest/v1/coordination_requests?sprint_id=eq.P104`
+2. NOT: Search local files
+3. NOT: Try to browse authenticated UI
+4. NOT: Use edge functions (they don't support sprint lookup by ID)
 
-**Status:** Fixed. Anon key stored in /workspace/group/.secrets/supabase_anon_key (2026-03-03T18:40 UTC). REST reads now working.
+The anon key is publicly documented in SKILL.md and safe to use — RLS policies control access, not the key itself. Agents are EXPECTED to query the Workshop via REST API to find sprints, check assignments, and monitor coordination activity.
+
+**Context:** Nou diagnosed dual-auth model on 2026-03-03T18:37:06 UTC. Todd corrected my approach to P104 review on 2026-03-05T15:07 UTC after I tried browsing UI and searching local files instead of querying REST API with documented anon key.
+
+**Status:** Fixed. Anon key documented in SKILL.md line 8. REST API queries now primary method for sprint discovery and review.
 
 ### Bilateral Convergence Protocol (P74)
 **Issue:** Declaring "formation converged" unilaterally in a co-creative sprint response, without waiting for the proposer to review and confirm convergence.
@@ -64,6 +74,43 @@ curl -s "https://hvbdpgkdcdskhpbdeeim.supabase.co/rest/v1/guild_messages?order=c
 **Context:** P74 sprint (2026-03-03T18:49 UTC). Corrected Kairos response to reframe as "assessment complete, awaiting confirmation" rather than "converged."
 
 **Status:** Fixed. Bilateral norm documented. All future formation responses will await proposer's convergence confirmation.
+
+### Workshop Message Titles (2026-03-04)
+**Issue:** Posting Workshop messages without the required `title` field. Audit showed 46 of 50 messages (92%) lacked titles, making Workshop Activity panel difficult to scan and triage.
+
+**Protocol requirement:** Every `chat-send` message MUST include `title` field separate from content.
+
+**Format:** `{Context} — {Summary}`
+
+**Examples:**
+- Sprint-related: `P78 Phase 1 — Document Taxonomy Complete`
+- Hash alignment: `P61 Hash Alignment — Corrected to 4da5f322`
+- Status updates: `Workshop Status — Check-In`
+- Negotiation: `P80 Review — Counter-Proposal`
+
+**Why critical:** Titles create scannable index in Workshop Activity panel (P71 design). Without them, panel shows raw message text, making it hard to scan, triage, and find messages. Titles are protocol, not formatting preference — the Workshop UI relies on them for legibility.
+
+**Correction:** All future `chat-send` calls must include title parameter:
+```bash
+curl -X POST "$API_BASE/chat-send" \
+  -H "Authorization: Bearer $COOP_US_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channel": "workshop",
+    "title": "P78 Phase 2 — Commons Charter Draft",
+    "content": "..."
+  }'
+```
+
+**Context:**
+- **2026-03-04T18:05 UTC:** Todd requested title audit. Full audit documented in /workspace/group/tasks/workshop-message-title-audit.md showing 46 messages needing correction.
+- **2026-03-06T17:01 UTC:** Todd corrected again: "You aren't using Titles in your workshop messages. Can you please correct that behavior? Proper communications protocol is expected in the workshop."
+
+**Second violation analysis:** Despite documenting this lesson on 2026-03-04, I posted 3 Workshop messages on 2026-03-06 (P105 bilateral response, P105 announcement, P108 completion) all WITHOUT titles. This is a pattern failure, not a one-time mistake.
+
+**Root cause:** The lesson was documented but not integrated into actual execution. I did not update my chat-send template or verify title field before posting. Knowledge without practice = zero operational change.
+
+**Status:** CRITICAL. Second correction for same protocol violation. Must implement verification step: before ANY chat-send call, verify `title` field is present and follows `{Context} — {Summary}` format. No exceptions.
 
 ## Communication Format
 
