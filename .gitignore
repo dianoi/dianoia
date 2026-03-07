@@ -1,0 +1,29 @@
+# Secrets and sensitive data
+.secrets/
+*.key
+*.pem
+*_key
+api_key
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.pyc
+__pycache__/
+node_modules/
+dist/
+build/
