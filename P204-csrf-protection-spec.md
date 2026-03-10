@@ -1,8 +1,8 @@
 # P204: CSRF Protection Implementation Specification
 
-**Status:** Draft
+**Status:** Final - Simplified Option B
 **Author:** Dianoia
-**Date:** 2026-03-09
+**Date:** 2026-03-09 (Updated 2026-03-10)
 **Source:** P176 H5 (Security Audit), P179 S22 (Backlog)
 **Repository:** https://github.com/nou-techne/habitat
 **Severity:** HIGH | **Complexity:** M | **Layer:** 1 (Identity/Security)
@@ -46,20 +46,19 @@ The Habitat application (co-op.us) currently uses localStorage-based authenticat
 
 ## Implementation Plan
 
-### Phase 1: Token Generation (Client-side)
+### Phase 1: Token Generation and Signing (Client + Server)
 
-**File:** `ui/src/lib/auth.ts`
-
-Add CSRF token generation and storage:
+**Client-side** (`ui/src/lib/auth.ts`):
 
 ```typescript
 /**
- * CSRF token storage key
+ * CSRF token storage key (stores the signed token from server)
  */
 const CSRF_TOKEN_KEY = 'csrfToken'
 
 /**
- * Generate a cryptographically secure CSRF token
+ * Generate a cryptographically secure random CSRF token
+ * This is the raw token that will be sent to server for signing
  */
 export function generateCsrfToken(): string {
   if (typeof window === 'undefined') return ''
@@ -70,24 +69,36 @@ export function generateCsrfToken(): string {
 }
 
 /**
- * Initialize CSRF token on session start
- * Called during authentication/session initialization
+ * Request signed CSRF token from server
+ * Called during authentication/login
  */
-export function initializeCsrfToken(): string {
-  if (typeof window === 'undefined') return ''
+export async function requestSignedCsrfToken(): Promise<string> {
+  const rawToken = generateCsrfToken()
 
-  let token = localStorage.getItem(CSRF_TOKEN_KEY)
+  // Send raw token to server for signing
+  const response = await fetch('/api/csrf/sign', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getAuthToken()}`
+    },
+    body: JSON.stringify({ token: rawToken })
+  })
 
-  if (!token) {
-    token = generateCsrfToken()
-    localStorage.setItem(CSRF_TOKEN_KEY, token)
+  if (!response.ok) {
+    throw new Error('Failed to obtain signed CSRF token')
   }
 
-  return token
+  const { signedToken } = await response.json()
+
+  // Store signed token
+  localStorage.setItem(CSRF_TOKEN_KEY, signedToken)
+
+  return signedToken
 }
 
 /**
- * Get current CSRF token
+ * Get current CSRF token (signed)
  */
 export function getCsrfToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -103,10 +114,64 @@ export function removeCsrfToken(): void {
 }
 ```
 
+**Server-side** (`packages/api/src/endpoints/csrf-sign.ts` or Edge Function):
+
+```typescript
+import { createHmac } from 'crypto'
+
+const CSRF_SECRET = process.env.CSRF_SECRET // Must be set in environment
+
+/**
+ * Sign a CSRF token with HMAC-SHA256
+ */
+export function signCsrfToken(rawToken: string): string {
+  if (!CSRF_SECRET) {
+    throw new Error('CSRF_SECRET not configured')
+  }
+
+  const hmac = createHmac('sha256', CSRF_SECRET)
+  hmac.update(rawToken)
+  const signature = hmac.digest('hex')
+
+  // Return token:signature format
+  return `${rawToken}.${signature}`
+}
+
+/**
+ * POST /api/csrf/sign
+ * Returns signed CSRF token for authenticated users
+ */
+export async function handleCsrfSign(req: Request): Promise<Response> {
+  // Verify user is authenticated
+  const authToken = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!authToken) {
+    return new Response('Unauthorized', { status: 401 })
+  }
+
+  // Verify JWT (existing auth validation)
+  const user = await verifyJwt(authToken)
+  if (!user) {
+    return new Response('Invalid token', { status: 401 })
+  }
+
+  const { token } = await req.json()
+
+  if (!token || !/^[a-f0-9]{64}$/.test(token)) {
+    return new Response('Invalid token format', { status: 400 })
+  }
+
+  const signedToken = signCsrfToken(token)
+
+  return new Response(JSON.stringify({ signedToken }), {
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
+```
+
 **Integration points:**
-1. Call `initializeCsrfToken()` in `initializeAuth()` function
-2. Call `removeCsrfToken()` in `logout()` function
-3. Regenerate token on successful login
+1. Call `requestSignedCsrfToken()` after successful login/authentication
+2. Call `removeCsrfToken()` on logout
+3. Server must have `CSRF_SECRET` environment variable set (generate with: `openssl rand -hex 32`)
 
 ### Phase 2: Header Injection (Client-side)
 
@@ -156,64 +221,168 @@ export function getAuthHeaders(): Record<string, string> {
 }
 ```
 
-### Phase 3: Server-side Validation
+### Phase 3: Server-side Validation (Simplified)
 
-**Location:** TBD — needs verification of API structure
-
-Likely candidates:
-- `packages/api/src/middleware/csrf.ts` (new file)
-- GraphQL resolver middleware
-- Express/Fastify middleware if using REST API
-- Supabase Edge Function wrapper
-
-**Pseudocode for validation:**
+**Validation Middleware** (`packages/api/src/middleware/csrf.ts`):
 
 ```typescript
-export function validateCsrfToken(req: Request): boolean {
-  const csrfToken = req.headers['x-csrf-token']
-  const sessionToken = req.headers['authorization']?.replace('Bearer ', '')
+import { createHmac, timingSafeEqual } from 'crypto'
 
-  if (!csrfToken) {
-    throw new Error('CSRF token missing')
+const CSRF_SECRET = process.env.CSRF_SECRET
+
+/**
+ * Verify signed CSRF token
+ * @param signedToken Format: "rawToken.signature"
+ * @returns true if valid, false otherwise
+ */
+export function verifyCsrfToken(signedToken: string): boolean {
+  if (!CSRF_SECRET) {
+    throw new Error('CSRF_SECRET not configured')
   }
 
-  // Validation approach 1: Token bound to session
-  // Store CSRF token in session data when generated
-  // Compare incoming token with stored session token
+  // Parse token:signature format
+  const parts = signedToken.split('.')
+  if (parts.length !== 2) {
+    return false
+  }
 
-  // Validation approach 2: Stateless verification
-  // Sign CSRF token with server secret
-  // Verify signature on incoming request
+  const [rawToken, providedSignature] = parts
 
-  // For localStorage-based auth, approach 1 requires:
-  // - CSRF token sent to client on login
-  // - Server stores mapping of sessionToken -> csrfToken
-  // - Validate match on mutation requests
+  // Validate raw token format (64 hex chars)
+  if (!/^[a-f0-9]{64}$/.test(rawToken)) {
+    return false
+  }
 
-  return true // If validation passes
+  // Recompute signature
+  const hmac = createHmac('sha256', CSRF_SECRET)
+  hmac.update(rawToken)
+  const expectedSignature = hmac.digest('hex')
+
+  // Timing-safe comparison
+  const providedBuffer = Buffer.from(providedSignature, 'hex')
+  const expectedBuffer = Buffer.from(expectedSignature, 'hex')
+
+  if (providedBuffer.length !== expectedBuffer.length) {
+    return false
+  }
+
+  return timingSafeEqual(providedBuffer, expectedBuffer)
+}
+
+/**
+ * CSRF validation middleware for state-changing operations
+ */
+export function requireCsrfToken(req: Request, res: Response, next: Function) {
+  // Only validate for state-changing methods
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next()
+  }
+
+  const csrfToken = req.headers['x-csrf-token']
+
+  if (!csrfToken) {
+    return res.status(403).json({
+      error: 'CSRF token required',
+      code: 'CSRF_TOKEN_MISSING'
+    })
+  }
+
+  if (!verifyCsrfToken(csrfToken)) {
+    return res.status(403).json({
+      error: 'Invalid CSRF token',
+      code: 'CSRF_TOKEN_INVALID'
+    })
+  }
+
+  next()
 }
 ```
 
-**Critical decision needed:** How to bind CSRF tokens to sessions in a stateless JWT architecture?
+**GraphQL Integration** (if using GraphQL mutations):
 
-**Option A — Session-bound tokens:**
-- Store CSRF tokens in Redis/DB keyed by JWT jti (JWT ID claim)
-- Validate by looking up expected CSRF token for that session
-- Requires stateful session tracking
+```typescript
+import { GraphQLError } from 'graphql'
+import { verifyCsrfToken } from '../middleware/csrf'
 
-**Option B — Signed tokens:**
-- Server signs CSRF token with secret key
-- Client receives signed token on login
-- Server validates signature on mutation
-- Remains stateless but requires server-side signing
+/**
+ * GraphQL context with CSRF validation
+ */
+export async function createContext({ req }): Promise<Context> {
+  const context = {
+    // ... existing context
+  }
 
-**Option C — JWT-embedded CSRF claim:**
-- Include CSRF token as claim in JWT itself
-- Client extracts and sends separately in header
-- Server validates header token matches JWT claim
-- Fully stateless
+  // Add CSRF validation helper to context
+  context.validateCsrf = () => {
+    const csrfToken = req.headers['x-csrf-token']
 
-**Recommendation:** Option C (JWT-embedded) for stateless architecture, fallback to Option A if session store already exists.
+    if (!csrfToken || !verifyCsrfToken(csrfToken)) {
+      throw new GraphQLError('CSRF validation failed', {
+        extensions: { code: 'CSRF_VALIDATION_FAILED' }
+      })
+    }
+  }
+
+  return context
+}
+
+/**
+ * Use in mutations:
+ */
+const createContribution = async (parent, args, context) => {
+  context.validateCsrf() // Throws if invalid
+
+  // ... mutation logic
+}
+```
+
+**Supabase Edge Function Integration**:
+
+```typescript
+import { verifyCsrfToken } from './_shared/csrf'
+
+Deno.serve(async (req) => {
+  // CSRF check for POST/PUT/DELETE
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    const csrfToken = req.headers.get('x-csrf-token')
+
+    if (!csrfToken || !verifyCsrfToken(csrfToken)) {
+      return new Response(
+        JSON.stringify({ error: 'CSRF validation failed' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+  }
+
+  // ... edge function logic
+})
+```
+
+**Approved Approach: Simplified Option B — Signed CSRF Tokens**
+
+This approach provides stateless CSRF protection using cryptographically signed tokens:
+
+**How it works:**
+1. **Client generates** a random CSRF token on session initialization
+2. **Client sends** the token to server during authentication/login
+3. **Server signs** the token with HMAC-SHA256 using a secret key
+4. **Server returns** the signed token to client
+5. **Client stores** signed token in localStorage
+6. **Client includes** signed token in `X-CSRF-Token` header on all mutations
+7. **Server validates** signature before executing state-changing operations
+
+**Key simplifications:**
+- No session store required (stateless)
+- No JWT modification needed (no new claims)
+- Simple HMAC signing/verification (standard crypto)
+- Token generated client-side (reduces server complexity)
+- Single validation check on server (verify HMAC signature)
+
+**Security properties:**
+- Attacker cannot forge valid signed token without secret key
+- Cross-origin requests cannot access localStorage token
+- Defense-in-depth if auth architecture evolves to cookies
+- Works with current localStorage-based JWT auth
 
 ### Phase 4: Cookie Security (If applicable)
 
@@ -370,28 +539,60 @@ describe('CSRF Validation Middleware', () => {
 - S25: Automated test suite (should include CSRF tests)
 - Future cookie-based auth migration (CSRF already in place)
 
-## Open Questions
+## Implementation Notes (Simplified Option B)
 
+**Approach confirmed:** Signed CSRF tokens (stateless, HMAC-SHA256)
+
+**Key decisions:**
+1. **Token format:** `{rawToken}.{hmacSignature}` (64-char hex + 64-char hex signature)
+2. **Signing algorithm:** HMAC-SHA256 with server-side secret
+3. **Storage:** Client stores signed token in localStorage
+4. **Header:** `X-CSRF-Token` for all state-changing requests
+5. **Validation:** Server verifies HMAC signature using timing-safe comparison
+6. **Scope:** All POST/PUT/DELETE/PATCH requests (exempt GET/HEAD/OPTIONS)
+
+**Remaining implementation questions:**
 1. **Where is the GraphQL API server code located?** (packages/api? supabase/functions?)
-2. **Does `getAuthHeaders()` exist somewhere not yet reviewed?**
-3. **Are any cookies currently set by the application?**
-4. **Is there an existing session store (Redis, DB) for stateful token binding?**
-5. **What is the JWT structure? Does it include jti (JWT ID) claim?**
-6. **Should CSRF validation be per-resolver or global middleware?**
-7. **Are there public (unauthenticated) mutations that should be exempt?**
+2. **Edge Function vs Express/Fastify middleware?** (Choose based on actual API architecture)
+3. **GraphQL mutations:** Validate in context setup or per-resolver?
+4. **Public mutations:** Which operations should be exempt from CSRF? (e.g., unauthenticated signup)
+5. **Environment:** Where to set `CSRF_SECRET`? (.env, Supabase secrets, deployment config)
 
-## Success Criteria
+**Migration path:**
+1. Phase 1: Deploy `/api/csrf/sign` endpoint (users won't have tokens yet, validation not enforced)
+2. Phase 2: Update client to request signed tokens on login (tokens start being issued)
+3. Phase 3: Enable CSRF validation with 7-day grace period (log but don't block)
+4. Phase 4: Enforce validation (block requests without valid token)
 
-- [ ] CSRF tokens generated on session init
-- [ ] Tokens stored in localStorage (not cookies)
-- [ ] X-CSRF-Token header included in all mutation requests
-- [ ] Server validates token before executing state-changing operations
-- [ ] Unit tests for token generation/storage
-- [ ] Integration tests for header injection
-- [ ] E2E tests for mutation protection
-- [ ] Server-side tests for validation middleware
-- [ ] Documentation updated (SECURITY.md, API docs)
-- [ ] Zero-downtime deployment with grace period
+## Success Criteria (Simplified Option B)
+
+**Client-side:**
+- [ ] CSRF tokens generated client-side (64-char hex)
+- [ ] `/api/csrf/sign` endpoint called on login to obtain signed token
+- [ ] Signed tokens stored in localStorage (format: `token.signature`)
+- [ ] X-CSRF-Token header included in all mutation requests (Apollo authLink + fetch helper)
+- [ ] Token cleared on logout
+
+**Server-side:**
+- [ ] `/api/csrf/sign` endpoint implemented (requires authentication)
+- [ ] HMAC-SHA256 signing function with `CSRF_SECRET`
+- [ ] Validation middleware for POST/PUT/DELETE/PATCH requests
+- [ ] Timing-safe signature comparison
+- [ ] 403 response on missing/invalid CSRF token
+- [ ] Public endpoints properly exempted
+
+**Testing:**
+- [ ] Unit tests for client token generation
+- [ ] Unit tests for server signing/verification
+- [ ] Integration tests for header injection in Apollo Client
+- [ ] E2E tests for mutation protection (Playwright)
+- [ ] Test invalid signature rejection
+- [ ] Test grace period behavior
+
+**Deployment:**
+- [ ] `CSRF_SECRET` environment variable set (32-byte hex)
+- [ ] Zero-downtime migration (4-phase rollout)
+- [ ] Documentation updated (SECURITY.md, API docs, deployment guide)
 - [ ] Security audit confirms protection is effective
 
 ## References
