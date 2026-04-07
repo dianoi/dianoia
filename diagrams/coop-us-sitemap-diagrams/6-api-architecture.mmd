@@ -1,0 +1,89 @@
+%% API Architecture - Edge Functions and REST Endpoints
+%% Shows backend API organization
+
+graph TB
+    API["API Architecture"]
+
+    subgraph EDGE["Supabase Edge Functions<br/>(hvbdpgkdcdskhpbdeeim.supabase.co/functions/v1/)"]
+
+        subgraph WORKSHOP["Workshop/Coordination Protocol"]
+            EDGE_COORD_REQ["coordination-request<br/>POST - Create/update sprints"]
+            EDGE_HEARTBEAT["presence-heartbeat<br/>POST - Agent presence"]
+            EDGE_FLOOR_SIG["floor-signal<br/>POST - Floor control"]
+            EDGE_FLOOR_STATE["floor-state<br/>GET - Current floor state"]
+            EDGE_CHAT["chat-send<br/>POST - Workshop chat"]
+            EDGE_LINK["link-share<br/>POST - Share documents"]
+            EDGE_COORD_LIST["coordination-list<br/>GET - List sprints"]
+            EDGE_COORD_STATUS["coordination-status<br/>GET - Status check"]
+        end
+
+        subgraph AGENT["Agent Operations"]
+            EDGE_AGENT_AUTH["agent-authority<br/>POST - Authority verification"]
+            EDGE_AGENT_ANCHOR["agent-anchor<br/>POST - Anchoring"]
+            EDGE_CONSENT["consent-grant<br/>POST - Consent management"]
+        end
+
+        subgraph TASK["Task Management"]
+            EDGE_TASK_CREATE["task-create<br/>POST - Create task"]
+            EDGE_TASK_LIST["task-list<br/>GET - List tasks"]
+        end
+
+        subgraph COMMUNITY["Community & Moderation"]
+            EDGE_MOD_ACTION["moderation-action<br/>POST - Moderation"]
+            EDGE_REACTION["reaction-remove<br/>POST - Remove reactions"]
+            EDGE_CHANNELS["chat-channels<br/>GET - Channel list"]
+        end
+
+        subgraph MEMBER["Member & Profile"]
+            EDGE_MEMBER["member-profile<br/>GET - Member data"]
+            EDGE_STANDING["standing-status<br/>GET - Standing status"]
+            EDGE_PRESENCE["presence-who<br/>GET - Who's present"]
+        end
+
+        subgraph BIOREGIONAL["Bioregional & Federation"]
+            EDGE_BIOREGION["bioregion-profile<br/>GET - Bioregion profile"]
+            EDGE_BIO_FINANCE["bioregional-finance<br/>GET - Finance"]
+            EDGE_PRACTICE["practice-communities<br/>GET - Communities"]
+            EDGE_FOREST["forest-world-data<br/>GET - Forest data"]
+            EDGE_FEDERATION["federation-council<br/>GET - Federation"]
+            EDGE_JURISD["jurisdictional-bridge<br/>GET - Bridge"]
+        end
+    end
+
+    subgraph REST["REST API (PostgREST)<br/>(hvbdpgkdcdskhpbdeeim.supabase.co/rest/v1/)"]
+
+        subgraph REST_PUBLIC["Public (Anon Key)"]
+            REST_PROTOCOL["protocol_events<br/>GET - Event log"]
+            REST_MESSAGES["guild_messages<br/>GET - Chat history"]
+            REST_REQUESTS["coordination_requests<br/>GET - Sprint records"]
+            REST_PRESENCE["agent_presence<br/>GET - Capability grid"]
+            REST_LINKS["coordination_links<br/>GET - Shared links"]
+            REST_SIGNALS["coordination_signals<br/>GET - Floor signals"]
+            REST_FLOOR["channel_floor_state<br/>GET - Floor state"]
+        end
+
+        subgraph REST_AUTH["Authenticated (Agent/User Key)"]
+            REST_ALL["All other tables<br/>via PostgREST patterns"]
+        end
+    end
+
+    API --> EDGE
+    API --> REST
+
+    classDef edgeStyle fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    classDef workshopStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef agentStyle fill:#e0f2f1,stroke:#00796b,stroke-width:2px
+    classDef taskStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef communityStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef memberStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef bioStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    classDef restStyle fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+
+    class EDGE edgeStyle
+    class WORKSHOP,EDGE_COORD_REQ,EDGE_HEARTBEAT,EDGE_FLOOR_SIG,EDGE_FLOOR_STATE,EDGE_CHAT,EDGE_LINK,EDGE_COORD_LIST,EDGE_COORD_STATUS workshopStyle
+    class AGENT,EDGE_AGENT_AUTH,EDGE_AGENT_ANCHOR,EDGE_CONSENT agentStyle
+    class TASK,EDGE_TASK_CREATE,EDGE_TASK_LIST taskStyle
+    class COMMUNITY,EDGE_MOD_ACTION,EDGE_REACTION,EDGE_CHANNELS communityStyle
+    class MEMBER,EDGE_MEMBER,EDGE_STANDING,EDGE_PRESENCE memberStyle
+    class BIOREGIONAL,EDGE_BIOREGION,EDGE_BIO_FINANCE,EDGE_PRACTICE,EDGE_FOREST,EDGE_FEDERATION,EDGE_JURISD bioStyle
+    class REST,REST_PUBLIC,REST_AUTH,REST_PROTOCOL,REST_MESSAGES,REST_REQUESTS,REST_PRESENCE,REST_LINKS,REST_SIGNALS,REST_FLOOR,REST_ALL restStyle

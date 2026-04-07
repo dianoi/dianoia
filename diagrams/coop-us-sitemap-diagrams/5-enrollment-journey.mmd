@@ -1,0 +1,57 @@
+%% Enrollment Journey - Progressive Dimension Unlock
+%% Shows the path from visitor to member
+
+graph LR
+    START((Visitor))
+
+    subgraph LANDING["Landing & Discovery"]
+        HOME["/home<br/>Explore"]
+        ABOUT["/about<br/>Learn about Techne"]
+        ENROLL["/enroll<br/>Begin enrollment"]
+    end
+
+    subgraph DIMENSIONS["Dimension Unlock Sequence"]
+        D_ARRIVE["/arrive<br/>H/ Arrival<br/>(First dimension)"]
+        D_VOICE["/voice<br/>L/ Voice"]
+        D_ARTIFACTS["/artifacts<br/>A/ Artifacts"]
+        D_CYCLES["/cycles<br/>S/ Cycles"]
+        D_TRAINING["/training<br/>T/ Training"]
+        D_METHODOLOGY["/methodology<br/>M/ Methodology"]
+        D_ECOLOGY["/ecology<br/>e/ Ecology"]
+    end
+
+    subgraph AUTH_UNLOCKED["After Authentication"]
+        PROFILE["/profile<br/>My profile"]
+        COORDINATE["/coordinate<br/>Workshop hub"]
+        CHANNELS["/channels<br/>Communication"]
+        ME["/me<br/>My activity"]
+    end
+
+    subgraph MEMBER_UNLOCKED["After Member Standing"]
+        WALLET["/wallet<br/>$CLOUD wallet"]
+        CAPITAL["/capital<br/>Capital account"]
+        LEARN["/learn<br/>Education"]
+        PROPOSE["/propose<br/>Submit proposals"]
+    end
+
+    START --> LANDING
+    LANDING --> ENROLL
+    ENROLL --> D_ARRIVE
+    D_ARRIVE --> D_VOICE
+    D_VOICE --> D_ARTIFACTS
+    D_ARTIFACTS --> D_CYCLES
+    D_CYCLES --> D_TRAINING
+    D_TRAINING --> D_METHODOLOGY
+    D_METHODOLOGY --> D_ECOLOGY
+    D_ECOLOGY --> AUTH_UNLOCKED
+    AUTH_UNLOCKED --> MEMBER_UNLOCKED
+
+    classDef landingStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef dimensionStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef authStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef memberStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+
+    class LANDING,HOME,ABOUT,ENROLL landingStyle
+    class DIMENSIONS,D_ARRIVE,D_VOICE,D_ARTIFACTS,D_CYCLES,D_TRAINING,D_METHODOLOGY,D_ECOLOGY dimensionStyle
+    class AUTH_UNLOCKED,PROFILE,COORDINATE,CHANNELS,ME authStyle
+    class MEMBER_UNLOCKED,WALLET,CAPITAL,LEARN,PROPOSE memberStyle

@@ -1,0 +1,49 @@
+%% Authentication Layers - Progressive Disclosure
+%% Shows how routes unlock as users gain standing
+
+graph TB
+    subgraph PUBLIC["🌍 PUBLIC (50 routes)<br/>No authentication required"]
+        LANDING["Landing & Enrollment<br/>/, /enroll, /join"]
+        ABOUT["About & Education<br/>/about/*, /workcraft, /commons"]
+        DIMENSIONS["Dimensions<br/>/arrive, /voice, /artifacts, /cycles, /training, /methodology, /ecology"]
+        DISCOVERY["Discovery<br/>/explore, /hubs, /techne, /progress"]
+        PROFILES["Public Profiles<br/>/p/:id, /member/:id, /hub/:slug"]
+        CHAIN["Merkle Tree<br/>/chain, /chain/:id, /leaf/:hash"]
+    end
+
+    subgraph AUTH["🔐 AUTHENTICATED (30 routes)<br/>Requires login"]
+        COORDINATE["Workshop Hub<br/>/coordinate, /coordinate/sprint/:id"]
+        PROFILE["My Profile<br/>/profile, /dimensions/dashboard"]
+        CHANNELS["Channels<br/>/channels, /channels/:slug"]
+        NOTIF["Notifications<br/>/notifications"]
+        ME["My Activity<br/>/me"]
+    end
+
+    subgraph MEMBER["👥 MEMBER (15 routes)<br/>Standing ≥ contributor"]
+        CLOUD["$CLOUD<br/>/wallet, /transfer, /transactions"]
+        PATRONAGE["Patronage<br/>/capital, /patronage, /patronage/k1"]
+        VENTURES["Ventures<br/>/ventures, /royalty-agreements"]
+        LEARN["Education<br/>/learn, /learn/:pathId"]
+        PROPOSE["Governance<br/>/propose"]
+    end
+
+    subgraph STEWARD["⚖️ STEWARD (15 routes)<br/>Standing = steward"]
+        DASHBOARD["Dashboard & Admin<br/>/dashboard, /queue, /hub-admin"]
+        PATRONAGE_TOOLS["Patronage Tools<br/>/patronage/bridge, /patronage/compliance"]
+        ADVANCED["Advanced<br/>/analytics, /convergence, /federation"]
+        MODERATION["Moderation<br/>/moderation, /audit"]
+    end
+
+    PUBLIC --> AUTH
+    AUTH --> MEMBER
+    MEMBER --> STEWARD
+
+    classDef publicStyle fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+    classDef authStyle fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    classDef memberStyle fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef stewardStyle fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+
+    class PUBLIC,LANDING,ABOUT,DIMENSIONS,DISCOVERY,PROFILES,CHAIN publicStyle
+    class AUTH,COORDINATE,PROFILE,CHANNELS,NOTIF,ME authStyle
+    class MEMBER,CLOUD,PATRONAGE,VENTURES,LEARN,PROPOSE memberStyle
+    class STEWARD,DASHBOARD,PATRONAGE_TOOLS,ADVANCED,MODERATION stewardStyle

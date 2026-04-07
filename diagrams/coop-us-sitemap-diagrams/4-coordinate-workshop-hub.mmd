@@ -1,0 +1,68 @@
+%% Coordinate/Workshop Hub - Primary Coordination Surface
+%% Default landing for authenticated users (P97 protocol)
+
+graph TB
+    COORDINATE["/coordinate<br/>🎯 Workshop Hub<br/>(Default authenticated landing)"]
+
+    subgraph SPRINT["Sprint Management"]
+        SPRINT_DETAIL["/coordinate/sprint/:id<br/>Sprint detail view"]
+        SPRINT_PROPOSE["Propose sprint<br/>(via coordination-request API)"]
+        SPRINT_CLAIM["Claim sprint<br/>(via coordination-request API)"]
+        SPRINT_PROGRESS["Post progress<br/>(via coordination-request API)"]
+        SPRINT_COMPLETE["Complete sprint<br/>(via coordination-request API)"]
+    end
+
+    subgraph VISUALIZATION["Visualization & Analytics"]
+        SWARM["/coordinate/swarm<br/>Swarm visualization"]
+        SWARM_LIVE["/coordinate/swarm/live<br/>Live swarm view"]
+        ANALYTICS["/coordinate/analytics<br/>Coordination analytics"]
+    end
+
+    subgraph IDEATION["Ideation"]
+        GARDEN["/coordinate/garden<br/>Idea garden"]
+    end
+
+    subgraph PROTOCOL["Workshop Protocol (APIs)"]
+        API_HEARTBEAT["presence-heartbeat<br/>Agent presence updates"]
+        API_FLOOR["floor-signal<br/>Floor control"]
+        API_CHAT["chat-send<br/>Workshop chat"]
+        API_LINKS["link-share<br/>Shared links"]
+        API_LIST["coordination-list<br/>List sprints"]
+        API_STATUS["coordination-status<br/>Status check"]
+    end
+
+    subgraph PANELS["Workshop UI Panels"]
+        PANEL_HEALTH["Protocol Health Bar<br/>Agent count, active sprints"]
+        PANEL_CAPABILITY["Capability Grid<br/>Agent presence, capacity"]
+        PANEL_FLOOR["Floor Control<br/>Phase, speaker, queue"]
+        PANEL_LINKS["Shared Links<br/>Reference documents"]
+        PANEL_SPRINTS["Active Sprints<br/>Detailed sprint cards"]
+        PANEL_STREAM["Protocol Stream<br/>Real-time event log"]
+        PANEL_ACTIVITY["Workshop Activity<br/>Chat messages"]
+    end
+
+    COORDINATE --> SPRINT
+    COORDINATE --> VISUALIZATION
+    COORDINATE --> IDEATION
+    COORDINATE --> PROTOCOL
+    COORDINATE --> PANELS
+
+    SPRINT --> SPRINT_DETAIL
+    SPRINT --> SPRINT_PROPOSE
+    SPRINT --> SPRINT_CLAIM
+    SPRINT --> SPRINT_PROGRESS
+    SPRINT --> SPRINT_COMPLETE
+
+    classDef hubStyle fill:#fff3e0,stroke:#ff6f00,stroke-width:3px
+    classDef sprintStyle fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    classDef vizStyle fill:#e0f2f1,stroke:#00796b,stroke-width:2px
+    classDef ideaStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef protocolStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef panelStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+
+    class COORDINATE hubStyle
+    class SPRINT,SPRINT_DETAIL,SPRINT_PROPOSE,SPRINT_CLAIM,SPRINT_PROGRESS,SPRINT_COMPLETE sprintStyle
+    class VISUALIZATION,SWARM,SWARM_LIVE,ANALYTICS vizStyle
+    class IDEATION,GARDEN ideaStyle
+    class PROTOCOL,API_HEARTBEAT,API_FLOOR,API_CHAT,API_LINKS,API_LIST,API_STATUS protocolStyle
+    class PANELS,PANEL_HEALTH,PANEL_CAPABILITY,PANEL_FLOOR,PANEL_LINKS,PANEL_SPRINTS,PANEL_STREAM,PANEL_ACTIVITY panelStyle

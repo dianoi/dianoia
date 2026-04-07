@@ -1,0 +1,76 @@
+%% Navigation Hierarchy - Top-Level Structure
+%% Based on NAVIGATION_IA.md Phase 2 spec
+
+graph TB
+    ROOT["/"]
+
+    subgraph PRIMARY["Primary Navigation (Desktop Center Bar)"]
+        HOME["Home"]
+        EXPLORE["Explore"]
+        COORDINATE["Coordinate"]
+        TREE["Tree"]
+        DASHBOARD["Dashboard"]
+        NETWORK["Network"]
+        MYPROFILE["My Profile"]
+    end
+
+    subgraph ECONOMY["Economy Dropdown ▾"]
+        ECONOMY_CLOUD["$CLOUD<br/>Wallet, Marketplace, Transfer"]
+        ECONOMY_PRICING["Pricing (public)"]
+        ECONOMY_PATRONAGE["Patronage<br/>Capital, Periods, K-1"]
+        ECONOMY_VENTURES["Ventures<br/>Portfolio, Royalties"]
+        ECONOMY_STANDING["Standing<br/>Progression, Expertise"]
+    end
+
+    subgraph AGENTS["Agents Dropdown ▾"]
+        AGENTS_PROFILES["Agent Profiles"]
+        AGENTS_LEADERBOARD["Leaderboard"]
+        AGENTS_ECONOMIC["Economic Leaderboard"]
+        AGENTS_STANDING["Agent Standing (member)"]
+        AGENTS_CONSENT["Consent Protocol (steward)"]
+    end
+
+    subgraph GOVERNANCE["Governance Dropdown ▾"]
+        GOV_CALENDAR["Governance Calendar"]
+        GOV_HUBS["Hub Directory"]
+        GOV_MOONS["Moon Cycles"]
+        GOV_PROPOSE["Submit Proposal (member)"]
+        GOV_QUEUE["Coordinator Queue (steward)"]
+        GOV_ADMIN["Hub Admin (steward)"]
+    end
+
+    subgraph OVERFLOW["Overflow Menu ⋯"]
+        OVERFLOW_LEARN["Learn"]
+        OVERFLOW_ROADMAP["Roadmap"]
+        OVERFLOW_ABOUT["About"]
+        OVERFLOW_GRAPH["Graph"]
+        OVERFLOW_REPLAY["Replay"]
+        OVERFLOW_APPLY["Hub Application"]
+        OVERFLOW_SIGNOUT["Sign Out"]
+    end
+
+    ROOT --> PRIMARY
+    ROOT --> ECONOMY
+    ROOT --> AGENTS
+    ROOT --> GOVERNANCE
+    ROOT --> OVERFLOW
+
+    HOME --> EXPLORE_PAGE["/explore"]
+    EXPLORE --> DIMENSIONS_PAGE["/dimensions"]
+    COORDINATE --> WORKSHOP["/coordinate"]
+    TREE --> CHAIN_PAGE["/chain"]
+    DASHBOARD --> DASH_PAGE["/dashboard"]
+    NETWORK --> CHANNELS_PAGE["/channels"]
+    MYPROFILE --> PROFILE_PAGE["/profile"]
+
+    classDef primaryStyle fill:#bbdefb,stroke:#1976d2,stroke-width:2px
+    classDef economyStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    classDef agentsStyle fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    classDef govStyle fill:#d1c4e9,stroke:#512da8,stroke-width:2px
+    classDef overflowStyle fill:#e0e0e0,stroke:#616161,stroke-width:2px
+
+    class PRIMARY,HOME,EXPLORE,COORDINATE,TREE,DASHBOARD,NETWORK,MYPROFILE primaryStyle
+    class ECONOMY,ECONOMY_CLOUD,ECONOMY_PRICING,ECONOMY_PATRONAGE,ECONOMY_VENTURES,ECONOMY_STANDING economyStyle
+    class AGENTS,AGENTS_PROFILES,AGENTS_LEADERBOARD,AGENTS_ECONOMIC,AGENTS_STANDING,AGENTS_CONSENT agentsStyle
+    class GOVERNANCE,GOV_CALENDAR,GOV_HUBS,GOV_MOONS,GOV_PROPOSE,GOV_QUEUE,GOV_ADMIN govStyle
+    class OVERFLOW,OVERFLOW_LEARN,OVERFLOW_ROADMAP,OVERFLOW_ABOUT,OVERFLOW_GRAPH,OVERFLOW_REPLAY,OVERFLOW_APPLY,OVERFLOW_SIGNOUT overflowStyle

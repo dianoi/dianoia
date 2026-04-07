@@ -1,0 +1,62 @@
+%% Economic Architecture - Three Economic Clusters
+%% Shows how economic features are organized
+
+graph TB
+    ECONOMY["Economic System"]
+
+    subgraph CLOUD["💰 $CLOUD (Credits)"]
+        CLOUD_WALLET["/wallet<br/>View balance"]
+        CLOUD_TRANSFER["/transfer<br/>Send CLOUD"]
+        CLOUD_TRANSACTIONS["/transactions<br/>History"]
+        CLOUD_BUDGET["/budget<br/>Budget manager"]
+        CLOUD_STAKING["/staking<br/>Stake CLOUD"]
+        CLOUD_MARKETPLACE["/marketplace<br/>Buy/Sell"]
+        CLOUD_RECOGNITION["/recognition<br/>Leaderboard"]
+        CLOUD_PRICING["/pricing<br/>Pricing (public)"]
+    end
+
+    subgraph PATRONAGE["🤝 PATRONAGE (Cooperative Allocation)"]
+        PATRONAGE_CAPITAL["/capital<br/>Capital account"]
+        PATRONAGE_REVIEW["/patronage<br/>Patronage review"]
+        PATRONAGE_PERIODS["/patronage/periods<br/>Allocation periods"]
+        PATRONAGE_DIST["/patronage/distributions<br/>Distributions"]
+        PATRONAGE_K1["/patronage/k1<br/>K-1 tax export"]
+
+        subgraph PATRONAGE_STEWARD["Steward Tools"]
+            PATRONAGE_BRIDGE["/patronage/bridge<br/>Weight bridge"]
+            PATRONAGE_CONFIG["/patronage/config<br/>Formula config"]
+            PATRONAGE_STEWARD_VIEW["/patronage/steward<br/>Steward view"]
+            PATRONAGE_EXPLORER["/patronage/explorer<br/>Explorer"]
+            PATRONAGE_COMPLIANCE["/patronage/compliance<br/>704(b) compliance"]
+        end
+    end
+
+    subgraph VENTURES["🚀 VENTURES (External Revenue)"]
+        VENTURES_PORTFOLIO["/ventures<br/>Venture portfolio"]
+        VENTURES_ROYALTY["/royalty-agreements<br/>Royalty agreements"]
+        VENTURES_REVENUE["/revenue-recording<br/>Revenue recording"]
+    end
+
+    subgraph STANDING["📊 STANDING (Progression)"]
+        STANDING_PROGRESSION["/standing<br/>Standing progression"]
+        STANDING_DOMAIN["/domain-expertise<br/>Domain expertise"]
+    end
+
+    ECONOMY --> CLOUD
+    ECONOMY --> PATRONAGE
+    ECONOMY --> VENTURES
+    ECONOMY --> STANDING
+
+    PATRONAGE --> PATRONAGE_STEWARD
+
+    classDef cloudStyle fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef patronageStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef venturesStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef standingStyle fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef stewardStyle fill:#ffebee,stroke:#c62828,stroke-width:2px
+
+    class CLOUD,CLOUD_WALLET,CLOUD_TRANSFER,CLOUD_TRANSACTIONS,CLOUD_BUDGET,CLOUD_STAKING,CLOUD_MARKETPLACE,CLOUD_RECOGNITION,CLOUD_PRICING cloudStyle
+    class PATRONAGE,PATRONAGE_CAPITAL,PATRONAGE_REVIEW,PATRONAGE_PERIODS,PATRONAGE_DIST,PATRONAGE_K1 patronageStyle
+    class VENTURES,VENTURES_PORTFOLIO,VENTURES_ROYALTY,VENTURES_REVENUE venturesStyle
+    class STANDING,STANDING_PROGRESSION,STANDING_DOMAIN standingStyle
+    class PATRONAGE_STEWARD,PATRONAGE_BRIDGE,PATRONAGE_CONFIG,PATRONAGE_STEWARD_VIEW,PATRONAGE_EXPLORER,PATRONAGE_COMPLIANCE stewardStyle
