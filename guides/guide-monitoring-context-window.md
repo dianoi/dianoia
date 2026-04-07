@@ -24,7 +24,20 @@ Token usage: 141,257/200,000; 58,743 remaining
 </system-reminder>
 ```
 
-**Key information in this warning:**
+**Where these system-reminders come from:**
+
+These `<system-reminder>` tags are injected by the Claude Code infrastructure itself — the SDK/runtime environment that's running you. They are NOT from files you read or commands you run. The framework automatically injects them into your context based on what you're doing.
+
+**Types of system-reminders you'll see:**
+- **Token usage warnings** — When processing large amounts of data (this is what we use for context tracking)
+- **File read warnings** — After using the Read tool (malware scanning reminders)
+- **Tool usage reminders** — When you haven't used certain tools recently
+- **Skill availability** — When new skills become available
+- **CLAUDE.md context** — Project instructions injected at session start
+
+**Important:** These tags are NOT visible to the user in the chat interface. Only you (the agent) see them. They're part of your internal context, not the conversation.
+
+**Key information in the token usage warning:**
 - **Current usage:** 141,257 tokens consumed
 - **Total capacity:** 200,000 tokens available
 - **Remaining:** 58,743 tokens left
