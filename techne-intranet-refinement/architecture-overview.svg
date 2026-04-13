@@ -1,0 +1,164 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .layer-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; fill: #c4956a; font-weight: 600; }
+      .component { font-family: 'Libre Baskerville', serif; font-size: 14px; fill: #e8e4dc; font-weight: 700; }
+      .detail { font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: #999999; }
+      .arrow { stroke: #c4956a; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .bidirectional { stroke: #7a9478; stroke-width: 1.5; stroke-dasharray: 4 2; }
+    </style>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c4956a"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" font-family="Libre Baskerville, serif" font-size="24" fill="#e8e4dc" font-weight="700">Techne Architecture Overview</text>
+  <text x="600" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#999999" letter-spacing="0.1em">18-MONTH TARGET STACK</text>
+
+  <!-- Layer 1: Client Layer -->
+  <g>
+    <rect x="50" y="100" width="1100" height="120" fill="#1a1a1a" stroke="#c4956a" stroke-width="2" rx="4"/>
+    <text x="70" y="125" class="layer-title">Layer 1 · Client / Interface</text>
+
+    <!-- Browser -->
+    <rect x="80" y="145" width="250" height="60" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="205" y="170" text-anchor="middle" class="component">Browser / Mobile</text>
+    <text x="205" y="190" text-anchor="middle" class="detail">Next.js 14 + React 18</text>
+    <text x="205" y="203" text-anchor="middle" class="detail">Voice Input (Web Speech API)</text>
+
+    <!-- Glide -->
+    <rect x="360" y="145" width="220" height="60" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="470" y="170" text-anchor="middle" class="component">Glide Mobile App</text>
+    <text x="470" y="190" text-anchor="middle" class="detail">Member-facing views</text>
+    <text x="470" y="203" text-anchor="middle" class="detail">(Block 5+, optional)</text>
+
+    <!-- Workshop UI -->
+    <rect x="610" y="145" width="250" height="60" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="735" y="170" text-anchor="middle" class="component">Workshop Coordinate</text>
+    <text x="735" y="190" text-anchor="middle" class="detail">Capability Grid + Sprint UI</text>
+    <text x="735" y="203" text-anchor="middle" class="detail">Supabase Realtime subscriptions</text>
+
+    <!-- Voice Confirmation -->
+    <rect x="890" y="145" width="240" height="60" fill="#222222" stroke="#7a9478" stroke-width="1.5" rx="3"/>
+    <text x="1010" y="170" text-anchor="middle" class="component">Voice Confirmation</text>
+    <text x="1010" y="190" text-anchor="middle" class="detail">Read-back before commit</text>
+    <text x="1010" y="203" text-anchor="middle" class="detail">User confirm/reject loop</text>
+  </g>
+
+  <!-- Arrow Client → API -->
+  <path d="M 600 220 L 600 270" class="arrow"/>
+
+  <!-- Layer 2: API / Edge Functions -->
+  <g>
+    <rect x="50" y="280" width="1100" height="140" fill="#1a1a1a" stroke="#c4956a" stroke-width="2" rx="4"/>
+    <text x="70" y="305" class="layer-title">Layer 2 · API / Processing</text>
+
+    <!-- Supabase Edge Functions -->
+    <rect x="80" y="325" width="280" height="80" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="220" y="350" text-anchor="middle" class="component">Supabase Edge Functions</text>
+    <text x="220" y="370" text-anchor="middle" class="detail">/transcribe (Whisper)</text>
+    <text x="220" y="383" text-anchor="middle" class="detail">/parse_intent (Claude API)</text>
+    <text x="220" y="396" text-anchor="middle" class="detail">/extract_from_transcript</text>
+
+    <!-- REA Operations -->
+    <rect x="390" y="325" width="240" height="80" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="510" y="350" text-anchor="middle" class="component">REA Operations</text>
+    <text x="510" y="370" text-anchor="middle" class="detail">treasury.record_event</text>
+    <text x="510" y="383" text-anchor="middle" class="detail">agreements.create_commitment</text>
+    <text x="510" y="396" text-anchor="middle" class="detail">governance.propose_decision</text>
+
+    <!-- Workshop Protocol -->
+    <rect x="660" y="325" width="240" height="80" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="780" y="350" text-anchor="middle" class="component">Workshop Protocol</text>
+    <text x="780" y="370" text-anchor="middle" class="detail">coordination-request</text>
+    <text x="780" y="383" text-anchor="middle" class="detail">presence-heartbeat</text>
+    <text x="780" y="396" text-anchor="middle" class="detail">floor-signal</text>
+
+    <!-- Make.com (optional) -->
+    <rect x="930" y="325" width="200" height="80" fill="#222222" stroke="#999999" stroke-width="1" stroke-dasharray="3 3" rx="3"/>
+    <text x="1030" y="350" text-anchor="middle" class="component">Make.com</text>
+    <text x="1030" y="370" text-anchor="middle" class="detail">Automation workflows</text>
+    <text x="1030" y="383" text-anchor="middle" class="detail">(optional, can use Edge Fns)</text>
+  </g>
+
+  <!-- Arrow API → Data -->
+  <path d="M 600 420 L 600 470" class="arrow"/>
+
+  <!-- Layer 3: Data / REA Substrate -->
+  <g>
+    <rect x="50" y="480" width="1100" height="260" fill="#1a1a1a" stroke="#c4956a" stroke-width="2" rx="4"/>
+    <text x="70" y="505" class="layer-title">Layer 3 · Data / REA Substrate</text>
+
+    <!-- PostgreSQL -->
+    <rect x="80" y="525" width="500" height="200" fill="#222222" stroke="#c4956a" stroke-width="2" rx="3"/>
+    <text x="330" y="550" text-anchor="middle" class="component">PostgreSQL (Supabase)</text>
+
+    <!-- Core Tables -->
+    <g transform="translate(100, 570)">
+      <text x="0" y="0" class="detail" font-weight="600">Core Tables:</text>
+      <text x="0" y="18" class="detail">• agents (People foundation)</text>
+      <text x="0" y="33" class="detail">• resources (Treasury foundation)</text>
+      <text x="0" y="48" class="detail">• events (immutable, core primitive)</text>
+      <text x="0" y="63" class="detail">• commitments (Agreements foundation)</text>
+      <text x="0" y="78" class="detail">• contracts (Agreements foundation)</text>
+      <text x="0" y="93" class="detail">• policies (Governance layer)</text>
+    </g>
+
+    <g transform="translate(320, 570)">
+      <text x="0" y="0" class="detail" font-weight="600">Derived Views:</text>
+      <text x="0" y="18" class="detail">• resource_balances (materialized)</text>
+      <text x="0" y="33" class="detail">• patronage_balances (materialized)</text>
+      <text x="0" y="48" class="detail">• commitment_status (materialized)</text>
+      <text x="0" y="63" class="detail">• 704b_book_capital (derived)</text>
+      <text x="0" y="78" class="detail">• xero_projection (derived)</text>
+    </g>
+
+    <!-- Realtime -->
+    <rect x="610" y="525" width="240" height="90" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="730" y="555" text-anchor="middle" class="component">Supabase Realtime</text>
+    <text x="730" y="575" text-anchor="middle" class="detail">Postgres subscriptions</text>
+    <text x="730" y="588" text-anchor="middle" class="detail">WebSocket live updates</text>
+    <text x="730" y="601" text-anchor="middle" class="detail">All clients see changes instantly</text>
+
+    <!-- RLS -->
+    <rect x="610" y="635" width="240" height="90" fill="#222222" stroke="#333333" stroke-width="1.5" rx="3"/>
+    <text x="730" y="665" text-anchor="middle" class="component">Row-Level Security</text>
+    <text x="730" y="685" text-anchor="middle" class="detail">Multi-tenant isolation</text>
+    <text x="730" y="698" text-anchor="middle" class="detail">Agent-based permissions</text>
+    <text x="730" y="711" text-anchor="middle" class="detail">Org-scoped queries</text>
+
+    <!-- External APIs -->
+    <rect x="880" y="525" width="250" height="90" fill="#222222" stroke="#999999" stroke-width="1" stroke-dasharray="3 3" rx="3"/>
+    <text x="1005" y="555" text-anchor="middle" class="component">External APIs</text>
+    <text x="1005" y="575" text-anchor="middle" class="detail">Claude API (intent parsing)</text>
+    <text x="1005" y="588" text-anchor="middle" class="detail">Whisper API (transcription)</text>
+    <text x="1005" y="601" text-anchor="middle" class="detail">Xero API (financial export)</text>
+
+    <!-- Pattern Library -->
+    <rect x="880" y="635" width="250" height="90" fill="#222222" stroke="#7a9478" stroke-width="1.5" rx="3"/>
+    <text x="1005" y="665" text-anchor="middle" class="component">Pattern Library</text>
+    <text x="1005" y="685" text-anchor="middle" class="detail">Learning artifacts (anonymized)</text>
+    <text x="1005" y="698" text-anchor="middle" class="detail">Exported to other Techne orgs</text>
+    <text x="1005" y="711" text-anchor="middle" class="detail">Commons contribution</text>
+  </g>
+
+  <!-- Bidirectional arrows -->
+  <path d="M 205 220 L 205 240 L 180 240 L 180 325" class="bidirectional"/>
+  <path d="M 735 220 L 735 240 L 780 240 L 780 325" class="bidirectional"/>
+  <path d="M 330 420 L 330 440 L 330 525" class="bidirectional"/>
+  <path d="M 730 420 L 730 440 L 730 525" class="bidirectional"/>
+
+  <!-- Legend -->
+  <g transform="translate(50, 760)">
+    <rect x="0" y="0" width="15" height="12" fill="#222222" stroke="#c4956a" stroke-width="2" rx="2"/>
+    <text x="22" y="10" font-family="IBM Plex Mono, monospace" font-size="9" fill="#999999">Core component</text>
+
+    <rect x="150" y="0" width="15" height="12" fill="#222222" stroke="#7a9478" stroke-width="1.5" rx="2"/>
+    <text x="172" y="10" font-family="IBM Plex Mono, monospace" font-size="9" fill="#999999">Voice/Learning specific</text>
+
+    <rect x="320" y="0" width="15" height="12" fill="#222222" stroke="#999999" stroke-width="1" stroke-dasharray="2 2" rx="2"/>
+    <text x="342" y="10" font-family="IBM Plex Mono, monospace" font-size="9" fill="#999999">Optional/External</text>
+  </g>
+
+</svg>
